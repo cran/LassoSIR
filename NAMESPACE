@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(glmnet,glmnet,cv.glmnet)
+importFrom(graphics, plot)
+importFrom(stats, kmeans, var)
