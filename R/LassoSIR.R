@@ -135,7 +135,7 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
         
         for( ii in 1: min(p, H) )
           {
-            eii <- matrix( 0, nrow=p, ncol=1 )
+            eii <- matrix( 0, nrow= dim(svd.XH$v)[2], ncol=1 )
             eii[ii] <- 1
             eigen.vec <- solve( t(svd.XH$v), eii )
             
@@ -159,30 +159,13 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
             beta.hat[ keep.ind, ii ] <- as.double( lars.fit$beta )
           }
 
-        ## The statistic for determining d is ||beta_i|| * lambda_i
-        temp.2 <- sqrt( apply( beta.hat^2, 2, sum) )* res.eigen.value[1:H] 
-        temp <- temp.2/temp.2[1]
+          ## The statistic for determining d is ||beta_i|| * lambda_i
+          temp.2 <- sqrt( apply( beta.hat^2, 2, sum) )* res.eigen.value[1:H] 
+          temp <- temp.2/temp.2[1]
 
-        ## To search for the big gap, it must satisfied the following two conditions.
-        ## Condition 1, we require that the ratio of two contigency value must be greater than 3
-        
-        ## temp.2 <- sqrt( apply( beta.hat^2, 2, sum) )* res.eigen.value[1:H] 
-        ## temp <- temp.2/temp.2[1] ## Rescale the value according to the first value of the statistic
 
-        ## ratio <- temp[1:(H-1)]/ temp[2:H]
-        ## dim.cand <- which( ratio >2 )
-        ## if( length( dim.cand )==0 ){
-        ##   no.dim <- 1
-        ## }else{
-        ##   ## Condition 2, we require the actuall difference is at least 0.5
-        ##   diff <- temp[1:(H-1)] - temp[2:H]
-        ##   if( length( which(diff[dim.cand]>0.1) )==0 ){
-        ##     no.dim <- 1
-        ##   }else{
-        ##     no.dim <- dim.cand[ max( which( diff[ dim.cand ]> 0.1) ) ]
-        ##   }
-        res.kmeans <- kmeans( temp, centers=2 )
-        no.dim <- min( sum( res.kmeans$cluster==1), sum( res.kmeans$cluster==2 ) )
+          res.kmeans <- kmeans( temp, centers=2 )
+          no.dim <- min( sum( res.kmeans$cluster==1), sum( res.kmeans$cluster==2 ) )
       }
     
     beta.hat <- array(0, c(p, no.dim) )
@@ -191,7 +174,7 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
     
     for( ii in 1:no.dim)
       {
-        eii <- matrix( 0, nrow=p, ncol=1 )
+        eii <- matrix( 0, nrow= dim( t(svd.XH$v) )[2], ncol=1 )
         eii[ii] <- 1
         eigen.vec <- solve( t(svd.XH$v), eii )
         
