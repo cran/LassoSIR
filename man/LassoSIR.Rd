@@ -11,7 +11,7 @@ LassoSIR
   which can be either continuous or categorical. X is arranged such that
   each column corresponds to one variable and each row corresponds
   to one subject.
-  
+
   The function gives users options to choose (i) the dimension of the
   SDR space, (ii) screening based on the diagonal thresholding, (iii)
   the number of slices (H), and many others.
@@ -32,41 +32,41 @@ LassoSIR(X, Y, H = 0, choosing.d = "automatic", solution.path = FALSE,
   }
   \item{H}{
     The number of slices.
-    
+
     (i) If the boolean variable "categorical" is true, H   is chosen as
     the number of categories automatically.
-    
+
     (ii) If the response variable is continuous, namely, "categorical" is
     false, user need to specify the number of slices. If H is set as 0,
     the code will ask the user to enter the number of slices interactively;
-    
+
     (iii) the default choice of H is zero.
   }
   \item{choosing.d}{
     This argument asks for the method of choosing the dimension of SDR. If
     no.dim is non zero, then choosing.d is set as "given". Otherwise,
     choosing.d can be set as "automatic" or "manual".
-    
+
     When choosing.d is set as "manual", this function will calculate the
     eigenvalues of var(EX|Y) and plot these eigenvalues. After that, the user will be asked to enter
     the dimension interactively.
-    
+
     When choosing.d is set as "automatic", the dimension will be
     determined automatically according to Algorithm 5 from the original
-    paper.  
-    
+    paper.
+
     The default option is "automatic".
   }
   \item{solution.path}{
     When setting this boolean variable as TRUE, a plot with solution path
     based on the final proposed model will be plotted.
-    
+
     The default option is FALSE.
   }
   \item{categorical}{
     When setting this boolean variable as TRUE, the response variable is
     categorical; otherwise, the response variable is continuous.
-    
+
     The default option is FALSE.
   }
   \item{nfolds}{
@@ -86,16 +86,16 @@ LassoSIR(X, Y, H = 0, choosing.d = "automatic", solution.path = FALSE,
 \details{
   This function estimates the sufficient dimension reduction space using
   the sparse sliced inverse regression for high dimensional data via
-  Lasso (LassoSIR). 
+  Lasso (LassoSIR).
 }
 \value{
   When solution.path is set as true, the function returns a glmnet
   object.
-  
+
   When solution.path is set as false, the tuning parameter in Lasso is
   chosen by using the cross validation. The function returns the
   following values:
-  
+
   \item{beta}{the estimated coefficient in SDR.}
 
   \item{eigen.value}{the eigen value of the estimator of \eqn{var(EY|X)}.}
@@ -103,17 +103,19 @@ LassoSIR(X, Y, H = 0, choosing.d = "automatic", solution.path = FALSE,
   \item{no.dim}{the dimension of the central space.}
 
   \item{H}{the number of slices.}
-  
+
   \item{categorical}{a boolean variable to indicate the type of the response.}
 }
 \references{
-  Lin, Q., Zhao, Z. , and Liu, J. (2017) On consistency and sparsity for
+  Lin, Q., Zhao, Z. , and Liu, J. (2018) On consistency and sparsity for
   sliced inverse regression in high dimension.   Annals of
-  Statistics.  
-  
-  Lin, Q., Zhao, Z. , and Liu, J. (2016) Sparse Sliced Inverse
-  Regression for High Dimensional Data.
+  Statistics. Vol. 46, Number 2. Page 580-610.
+
+  Lin, Q., Zhao, Z. , and Liu, J. (2019) Sparse Sliced Inverse
+  Regression for High Dimensional Data. Journal of the American Statistical Association. Vol. 114, Number 528, Page 1726-1739.
 }
+
+
 \author{
   Zhigen Zhao, Qian Lin, Jun S. Liu
 }

@@ -20,17 +20,17 @@ LassoSIR
 Maintainer: \packageMaintainer{LassoSIR}
 }
 \references{
-  Qian Lin, Zhigen Zhao, Jun S. Liu (2017) On consistency and sparsity
-  for sliced inverse regression in high dimensions. Annals of
-  Statistics. https://arxiv.org/abs/1507.03895
+  Lin, Q., Zhao, Z. , and Liu, J. (2018) On consistency and sparsity for
+  sliced inverse regression in high dimension.   Annals of
+  Statistics. Vol. 46, Number 2. Page 580-610.
 
-  
-  Qian Lin, Zhigen Zhao, Jun S. Liu (2017) Sparse Sliced Inverse
-  Regression for High Dimensional Data. https://arxiv.org/abs/1611.06655
+  Lin, Q., Zhao, Z. , and Liu, J. (2019) Sparse Sliced Inverse
+  Regression for High Dimensional Data. Journal of the American Statistical Association. Vol. 114, Number 528, Page 1726-1739.
 }
+
 \keyword{ Lasso-SIR }
 \seealso{
-NA  
+NA
 }
 \examples{
 

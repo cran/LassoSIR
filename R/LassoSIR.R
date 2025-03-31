@@ -14,10 +14,10 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
                    }
                    )()
       }
-    
+
     p <- dim(X)[2]
     n <- dim(X)[1]
-    
+
 
     if( categorical==FALSE)
       {
@@ -46,30 +46,31 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
           }
 
         ## Calculate the screening statistics
-        if( screening==TRUE){          
+        if( screening==TRUE){
           x.sliced.mean <- M%*%X
           sliced.variance <- apply( x.sliced.mean, 2, var )
           keep.ind <- sort( order( sliced.variance, decreasing=TRUE)[1:n] )
         }else{
           keep.ind <- c(1:p)
         }
-        
+
         X <- X[, keep.ind]
-        
+
         X.H <- matrix(0, nrow=H, ncol= dim(X)[2] )
         grand.mean <- matrix( apply(X, 2, mean ), nrow=1, ncol=dim(X)[2] )
-        X.stand.ord <- X - grand.mean %x% matrix(1, nrow=dim(X)[1], ncol=1)   
+        X.stand.ord <- X - grand.mean %x% matrix(1, nrow=dim(X)[1], ncol=1)
+        X.stand.ord <- as.matrix( X.stand.ord )
         X.H <- M%*% X.stand.ord
-       
+
       }else{
         ms <- array(0, n)
-        
+
         Y.unique <- unique(Y)
         H <- length( Y.unique )
-        ORD <- which( Y==Y.unique[1] )      
+        ORD <- which( Y==Y.unique[1] )
         nH <- sum( Y == Y.unique[1] )
         ms[1:nH] <- nH
-        
+
         for( i in 2:H )
           {
             ORD <- c( ORD, which(Y==Y.unique[i]) )
@@ -92,12 +93,13 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
         }else{
           keep.ind <- c(1:p)
         }
-        
+
         X <- X[, keep.ind]
-        
+
         X.H <- matrix(0, nrow=H, ncol= dim(X)[2] )
         grand.mean <- matrix( apply(X, 2, mean ), nrow=1, ncol=dim(X)[2] )
         X.stand.ord <- X - grand.mean %x% matrix(1, nrow=dim(X)[1], ncol=1)
+        X.stand.ord <- as.matrix( X.stand.ord )
         X.H <- M%*% X.stand.ord
 
       }
@@ -109,7 +111,7 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
     ## LambdaHat <- t(X.H) %*% X.H/H
     ## temp <- eigen( LambdaHat )
     ## res.eigen.value <- temp$values
-    
+
     if( choosing.d=="manual")
       {
         plot( c(1:p), res.eigen.value, ylab="eigen values" )
@@ -132,27 +134,29 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
         ## To search for unknown d, we start from the maximum value H
         beta.hat <- array(0, c(p, min(p, H) ) )
         Y.tilde <- array(0, c(n, min(p, H ) ) )
-        
+
         for( ii in 1: min(p, H) )
           {
             eii <- matrix( 0, nrow= dim(svd.XH$v)[2], ncol=1 )
             eii[ii] <- 1
             eigen.vec <- solve( t(svd.XH$v), eii )
-            
-            Y.tilde[,ii] <- t(M) %*% M %*% X.stand.ord %*% eigen.vec/( res.eigen.value[ii] )*matrix( 1/ms, nrow=n, ncol=1 )
+
+            tmp1=M %*% X.stand.ord %*% eigen.vec/(res.eigen.value[ii])
+            Y.tilde[, ii] <- t(M) %*% tmp1 * matrix(1/ms, nrow = n, ncol = 1)
+
           }
-        
+
         mus <- array(0, min(p, H) )
-        
+
         for(ii in 1: min(p, H ) )
           {
             lars.fit.cv <- cv.glmnet( X.stand.ord, Y.tilde[,ii], nfolds=nfolds )
             ## choose the one with the smallest cvm
-            
+
             ind <- max( which( lars.fit.cv$cvm==min(lars.fit.cv$cvm) ) )
             if(ind==1)
               ind <- 2
-            
+
             lambda <- lars.fit.cv$lambda[ind]
             mus[ ii ] <- lambda
             lars.fit <- glmnet(X.stand.ord, Y.tilde[,ii], lambda=lambda)
@@ -160,28 +164,33 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
           }
 
           ## The statistic for determining d is ||beta_i|| * lambda_i
-          temp.2 <- sqrt( apply( beta.hat^2, 2, sum) )* res.eigen.value[1:H] 
+          temp.2 <- sqrt( apply( beta.hat^2, 2, sum) )* res.eigen.value[1:H]
           temp <- temp.2/temp.2[1]
 
-
-          res.kmeans <- kmeans( temp, centers=2 )
-          no.dim <- min( sum( res.kmeans$cluster==1), sum( res.kmeans$cluster==2 ) )
+        if( categorical==TRUE)
+          {
+            no.dim <- H-1
+          }else{
+            res.kmeans <- kmeans( temp, centers=2 )
+            no.dim <- min( sum( res.kmeans$cluster==1), sum( res.kmeans$cluster==2 ) )
+          }
       }
-    
+
     beta.hat <- array(0, c(p, no.dim) )
     Y.tilde <- array(0, c(n, no.dim) )
 
-    
+
     for( ii in 1:no.dim)
       {
         eii <- matrix( 0, nrow= dim( t(svd.XH$v) )[2], ncol=1 )
         eii[ii] <- 1
         eigen.vec <- solve( t(svd.XH$v), eii )
-        
-        Y.tilde[,ii] <- t(M) %*% M %*% X.stand.ord %*% eigen.vec/( res.eigen.value[ii] )*matrix( 1/ms, nrow=n, ncol=1 )
+
+        tmp1=M %*% X.stand.ord %*% eigen.vec/(res.eigen.value[ii])
+        Y.tilde[, ii] <- t(M) %*% tmp1 * matrix(1/ms, nrow = n, ncol = 1)
       }
 
-    
+
     if( solution.path==FALSE )
       {
         mus <- array( 0, no.dim )
@@ -193,7 +202,7 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
           ind <- max( which( lars.fit.cv$cvm==min(lars.fit.cv$cvm) ) )
           if(ind==1)
             ind <- 2
-          
+
           lambda <- lars.fit.cv$lambda[ind]
           lars.fit <- glmnet(X.stand.ord, Y.tilde, lambda=lambda)
           beta.hat[ keep.ind ] <- as.double( lars.fit$beta )
@@ -202,11 +211,11 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
             {
               lars.fit.cv <- cv.glmnet( X.stand.ord, Y.tilde[,ii], nfolds=nfolds )
               ## choose the one with the smallest cvm
-              
+
               ind <- max( which( lars.fit.cv$cvm==min(lars.fit.cv$cvm) ) )
               if(ind==1)
                 ind <- 2
-              
+
               lambda <- lars.fit.cv$lambda[ind]
               mus[ ii ] <- lambda
               lars.fit <- glmnet(X.stand.ord, Y.tilde[,ii], lambda=lambda)
@@ -214,8 +223,14 @@ function( X, Y, H=0, choosing.d="automatic", solution.path=FALSE, categorical=FA
             }
         }
         ## list( beta= beta.hat, eigen.value=res.eigen.value, no.dim=no.dim, keep.ind=keep.ind, H=H, choosing.d=choosing.d, categorical=categorical, nfolds=nfolds, screening=screening, mu.lasso=mus )
+        if(no.dim==1)
+          beta.hat = beta.hat /sqrt( sum(beta.hat^2) )
+        if(no.dim > 1)
+        {
+          for(i in 1:no.dim)
+            beta.hat[,i] = beta.hat[,i]/sqrt( sum(beta.hat[,i]^2 ) )
+        }
         list( beta= beta.hat, eigen.value=res.eigen.value, no.dim=no.dim, H=H, categorical=categorical )
-
       }else{
         lars.fit.all <- list()
         for(ii in 1:no.dim)
